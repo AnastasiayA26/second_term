@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <cstdint>
+#include <initializer_list>
 
 class ArrayD{
 public:
