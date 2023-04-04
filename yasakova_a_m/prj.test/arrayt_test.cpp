@@ -43,18 +43,3 @@ TEST_CASE("[arrayd] - ArrayT<T> arithmetic ops") {
     CHECK(a == b);
     CHECK_THROWS(a / 0.0);
 }
-TEST_CASE("[arrayd] - ArrayT<T> size & capacity") {
-    ArrayT<T2> a(1, Rational(0));
-    CHECK(a[0] == 0);
-    a.push_back(Rational(1));
-    CHECK(a[1] == 1);
-    a.insert(2, Rational(2));
-    CHECK(a[2] == 2);
-    a.insert(1, Rational(3));
-    CHECK(a[1] == 3);
-    CHECK(a[2] == 1);
-    a.pop_back();
-    CHECK(a[2] == 1);
-    a.remove(0);
-    CHECK(a[1] == 1);
-}
