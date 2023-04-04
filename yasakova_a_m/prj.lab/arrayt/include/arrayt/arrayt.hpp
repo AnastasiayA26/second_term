@@ -13,6 +13,7 @@ public:
     ArrayT();
     ArrayT(const ArrayT<T>&);
     ArrayT(const std::ptrdiff_t sizeInp, const T num);
+    ArrayT(std::initializer_list<T> initList);
 
     ~ArrayT();
 
@@ -62,6 +63,12 @@ ArrayT<T>::ArrayT(const ArrayT<T>& other) {
         data_[i] = other.data_[i];
     }
     delete[] data_;
+}
+template<typename T>
+ArrayT<T>::ArrayT(std::initializer_list<T> initList) : size_(initList.size()), capacity_(initList.size()), data_(nullptr)
+{
+    data_ = new T[size_];
+    std::copy(initList.begin(), initList.end(), data_);
 }
 
 template<typename T>
