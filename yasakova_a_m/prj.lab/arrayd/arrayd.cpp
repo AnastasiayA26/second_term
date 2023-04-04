@@ -1,6 +1,7 @@
 #include <arrayd/arrayd.hpp>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 ArrayD::ArrayD() {
     data_ = nullptr;
