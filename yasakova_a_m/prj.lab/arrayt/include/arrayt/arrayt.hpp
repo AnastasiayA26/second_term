@@ -5,7 +5,6 @@
 #include <iostream>
 #include <cstdint>
 #include <exception>
-#include <initializer_list>
 
 template<typename T>
 class ArrayT{
@@ -13,7 +12,6 @@ public:
     ArrayT();
     ArrayT(const ArrayT<T>&);
     ArrayT(const std::ptrdiff_t sizeInp, const T num);
-    ArrayT(std::initializer_list<T> initList);
 
     ~ArrayT();
 
@@ -22,29 +20,20 @@ public:
 
     void insert(const ptrdiff_t i, const T value);
     void resize(ptrdiff_t new_size);
-    void push_back(T newElement);
-    T pop_back();
     void remove(const ptrdiff_t i);
     explicit ArrayT(const std::ptrdiff_t len);
 
     ptrdiff_t ssize() const noexcept;
 
     ArrayT<T>& operator=(const ArrayT<T>& rhs);
-    ArrayT<T>& operator+=(const T rhs);
-    ArrayT<T>& operator-=(const T rhs);
-    ArrayT<T>& operator*=(const T rhs);
-    ArrayT<T>& operator/=(const T rhs);
-
-    ArrayT<T>& operator+();
-    ArrayT<T>& operator-();
 
     std::ostream& writeTo(std::ostream& ostrm) const;
     /*std::istream& readFrom(std::istream& istrm);*/
 
 public:
-    ptrdiff_t capacity_;
+    std::ptrdiff_t capacity_;
     T* data_;
-    ptrdiff_t size_;
+    std::ptrdiff_t size_;
     static const char cmm{ ',' };
 };
 
@@ -63,12 +52,6 @@ ArrayT<T>::ArrayT(const ArrayT<T>& other) {
         data_[i] = other.data_[i];
     }
     delete[] data_;
-}
-template<typename T>
-ArrayT<T>::ArrayT(std::initializer_list<T> initList) : size_(initList.size()), capacity_(initList.size()), data_(nullptr)
-{
-    data_ = new T[size_];
-    std::copy(initList.begin(), initList.end(), data_);
 }
 
 template<typename T>
@@ -122,19 +105,7 @@ template<typename T>
 ptrdiff_t ArrayT<T>::ssize() const noexcept {
     return size_;
 };
-template<typename T>
-void ArrayT<T>::push_back(const T newElem) {
-    if (ssize() == capacity_) {
-        resize(static_cast<ptrdiff_t>(ssize() + 1));
-    }
-    data_[ssize() - 1] = newElem;
-}
-template<typename T>
-T ArrayT<T>::pop_back() {
-    double tmp = data_[ssize() - 1];
-    resize(ssize() - 1);
-    return tmp;
-}
+
 template<typename T>
 void ArrayT<T>::remove(const ptrdiff_t i) {
     if ((i < 0) || (i > capacity_)) {
@@ -209,83 +180,6 @@ ArrayT<T>& ArrayT<T>::operator=(const ArrayT<T>& other) {
     return *this;
 }
 template<typename T>
-ArrayT<T>& ArrayT<T>::operator+=(const T rhs) {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] += rhs;
-    }
-    return *this;
-}
-template<typename T>
-ArrayT<T>& ArrayT<T>::operator-=(const T rhs) {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] -= rhs;
-    }
-    return *this;
-}
-template<typename T>
-ArrayT<T>& ArrayT<T>::operator*=(const T rhs) {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] *= rhs;
-    }
-    return *this;
-}
-template<typename T>
-ArrayT<T>& ArrayT<T>::operator/=(const T rhs) {
-    if (rhs == 0) {
-        throw std::invalid_argument("Divide by zero exception");
-    }
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] /= rhs;
-    }
-    return *this;
-}
-template<typename T>
-ArrayT<T>& ArrayT<T>::operator+() {
-    return *this;
-}
-template<typename T>
-ArrayT<T>& ArrayT<T>::operator-() {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] = -data_[i];
-    }
-    return *this;
-}
-template<typename T>
-ArrayT<T> operator+(ArrayT<T> lhs, const T rhs) {
-    lhs += rhs;
-    return lhs;
-}
-template<typename T>
-ArrayT<T> operator-(ArrayT<T> lhs, const T rhs) {
-    lhs -= rhs;
-    return lhs;
-}
-template<typename T>
-ArrayT<T> operator*(ArrayT<T> lhs, const T rhs) {
-    lhs *= rhs;
-    return lhs;
-}
-template<typename T>
-ArrayT<T> operator/(ArrayT<T> lhs, const T rhs) {
-    lhs /= rhs;
-    return lhs;
-}
-template<typename T>
-bool operator==(const ArrayT<T>& lhs, const ArrayT<T>& rhs) {
-    if (lhs.size_ != rhs.size_) {
-        return false;
-    }
-    bool isEqual = true;
-    for (std::ptrdiff_t i = 0; i < lhs.size_; ++i) {
-        isEqual &= (std::abs(lhs[i] - rhs[i]) < 0.00000001);
-    }
-    return isEqual;
-}
-template<typename T>
-bool operator!=(const ArrayT<T>& lhs, const ArrayT<T>& rhs) {
-    return !(lhs == rhs);
-}
-template<typename T>
 std::ostream& operator<<(std::ostream& ostrm, const ArrayT<T>& rhs) {
     return rhs.writeTo(ostrm);
 }
@@ -300,3 +194,4 @@ std::ostream& ArrayT<T>::writeTo(std::ostream& ostrm) const
     return ostrm;
 }
 #endif //LIB_ARRAYT_HPP
+
