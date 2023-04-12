@@ -1,6 +1,7 @@
 #include <arrayd/arrayd.hpp>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <sstream>
 
 ArrayD::ArrayD() {
@@ -12,13 +13,13 @@ ArrayD::ArrayD() {
 ArrayD::ArrayD(const ArrayD& other) {
     size_ = other.size_;
     capacity_ = other.size_;
-    data_ = new double[capacity_];
+    data_ = new double[other.capacity_];
     for (ptrdiff_t i = 0; i < size_; ++i) {
         data_[i] = other.data_[i];
     }
     delete[] data_;
 }
-ArrayD::ArrayD(const std::ptrdiff_t sizeInp) {
+ArrayD::ArrayD(const std::ptrdiff_t sizeInp, const double num) {
     if (sizeInp < 0) {
         throw std::out_of_range("Index out of range");
     }
@@ -26,10 +27,21 @@ ArrayD::ArrayD(const std::ptrdiff_t sizeInp) {
     capacity_ = sizeInp;
     data_ = new double[capacity_];
     for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
+        data_[i] = num;
+    }
+}
+ArrayD::ArrayD(const std::ptrdiff_t sizeInp) {
+    if (sizeInp < 0) {
+        throw std::out_of_range("Index out of range");
+    }
+    size_ = sizeInp;
+    capacity_ = sizeInp;
+    data_ = new double[sizeInp];
+    for (std::ptrdiff_t i = 0; i < ssize(); i++) {
         data_[i] = 0;
     }
 }
-void ArrayD::resize(const ptrdiff_t sizeInp) {
+void ArrayD::resize(const std::ptrdiff_t sizeInp) { // посмтори const в hader
     if (sizeInp < 0) {
         throw std::out_of_range("Size must be positive");
     }
@@ -61,81 +73,43 @@ ArrayD::~ArrayD()
     delete[] data_;
 }
 
-[[nodiscard]] double& ArrayD::operator[] (const ptrdiff_t index) {
-    if ((index < 0) || (index >= capacity_)) {
-        throw std::invalid_argument("Index is out of acceptable area");
+double& ArrayD::operator[] (const ptrdiff_t index) {
+    if ((index < 0) || (index >= ssize())) {
+        throw std::out_of_range("Index is out of acceptable area");
     }
-    else {
-        return data_[index];
-    }
+    return data_[index];
 }
-[[nodiscard]] const double& ArrayD::operator[] (const ptrdiff_t index) const {
-    if ((index < 0) || (index >= capacity_)) {
-        throw std::invalid_argument("Index is out of acceptable area");
+const double& ArrayD::operator[] (const ptrdiff_t index) const {
+    if ((index < 0) || (index >= ssize())) {
+        throw std::out_of_range("Index is out of acceptable area");
     }
-    else {
         return data_[index];
-    }
 }
-ptrdiff_t ArrayD::ssize() const noexcept {
+std::ptrdiff_t ArrayD::ssize() const noexcept {
     return size_;
 };
 
-void ArrayD::push_back(const double newElem) {
-    if (ssize() == capacity_) {
-        resize(static_cast<ptrdiff_t>(ssize() + 1));
-    }
-    data_[ssize() - 1] = newElem;
-}
 
-double ArrayD::pop_back() {
-    double tmp = data_[ssize() - 1];
+void ArrayD::remove(std::ptrdiff_t i) {
+    if ((i < 0) || (i > ssize())) {
+        throw std::out_of_range("index out of range");
+    }
+    for (std::ptrdiff_t start = i + 1; i < ssize(); ++i) {
+        data_[start-1] = data_[start];
+    }
     resize(ssize() - 1);
-    return tmp;
-}
-void ArrayD::remove(const ptrdiff_t i) {
-    if ((i < 0) || (i > capacity_)) {
-        throw std::invalid_argument("index out of range");
-    }
-    else {
-        size_ -= 1;
-        double* temp = new double[size_];
-        for (ptrdiff_t index = 0; index < i; ++index) {
-            temp[index] = data_[index];
-        }
-        for (ptrdiff_t index = i + 1; index <= (size_); ++index) {
-            temp[index] = data_[index];
-        }
-        delete[] data_;
-        data_ = temp;
-        capacity_ -= 1;
-    }
 }
 
-ArrayD::ArrayD(const std::ptrdiff_t sizeInp, const double num) {
-    if (sizeInp < 0) {
-        throw std::out_of_range("Index out of range");
-    }
-    size_ = sizeInp;
-    capacity_ = sizeInp;
-    data_ = new double[capacity_];
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] = num;
-    }
-}
 
-void ArrayD::insert(const ptrdiff_t i, const double value) {
-    if (i < 0) {
-        throw std::invalid_argument("index must be larger 0");
+void ArrayD::insert(const std::ptrdiff_t i, const double value) {
+    if (i < 0 || i > ssize()) {
+        throw std::out_of_range("index must be larger 0");
     }
-    else {
-        resize(ssize() + 1);
-        for (ptrdiff_t index = ssize() - 1; index > i; --index) {
-            data_[index] = data_[index - 1];
-        }
-        data_[i] = value;
-        std::cout << "element was inserted" << std::endl;
+    resize(ssize() +1);
+    for (ptrdiff_t index = ssize() - 1; index > i; --index) {
+        data_[index] = data_[index - 1];
     }
+    data_[i] = value;
 }
 
 ArrayD& ArrayD::operator=(const ArrayD& other) {
@@ -149,84 +123,16 @@ ArrayD& ArrayD::operator=(const ArrayD& other) {
     return *this;
 }
 
-ArrayD& ArrayD::operator+=(const double rhs) {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] += rhs;
-    }
-    return *this;
-}
-ArrayD& ArrayD::operator-=(const double rhs) {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] -= rhs;
-    }
-    return *this;
-}
-ArrayD& ArrayD::operator*=(const double rhs) {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] *= rhs;
-    }
-    return *this;
-}
-ArrayD& ArrayD::operator/=(const double rhs) {
-    if (rhs == 0) {
-        throw std::invalid_argument("Divide by zero exception");
-    }
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] /= rhs;
-    }
-    return *this;
-}
-
-ArrayD& ArrayD::operator+() {
-    return *this;
-}
-ArrayD& ArrayD::operator-() {
-    for (std::ptrdiff_t i = 0; i < ssize(); ++i) {
-        data_[i] = -data_[i];
-    }
-    return *this;
-}
-ArrayD operator+(ArrayD lhs, const double rhs) {
-    lhs += rhs;
-    return lhs;
-}
-ArrayD operator-(ArrayD lhs, const double rhs) {
-    lhs -= rhs;
-    return lhs;
-}
-ArrayD operator*(ArrayD lhs, const double rhs) {
-    lhs *= rhs;
-    return lhs;
-}
-ArrayD operator/(ArrayD lhs, const double rhs) {
-    lhs /= rhs;
-    return lhs;
-}
-
-bool operator==(const ArrayD& lhs, const ArrayD& rhs) {
-    if (lhs.size_ != rhs.size_) {
-        return false;
-    }
-    bool isEqual = true;
-    for (std::ptrdiff_t i = 0; i < lhs.size_; ++i) {
-        isEqual &= (std::abs(lhs[i] - rhs[i]) < 0.00000001);
-    }
-    return isEqual;
-}
-
-bool operator!=(const ArrayD& lhs, const ArrayD& rhs) {
-    return !(lhs == rhs);
-}
 std::ostream& operator<<(std::ostream& ostrm, const ArrayD& rhs) {
-    return rhs.writeTo(ostrm);
+    return rhs.writeto(ostrm);
 }
 
-std::ostream& ArrayD::writeTo(std::ostream& ostrm) const
+std::ostream& ArrayD::writeto(std::ostream& ostrm) const
 {
     ostrm << '[';
-    for (ptrdiff_t i = 0; i < size_ - 1; ++i) {
+    for (ptrdiff_t i = 0; i < ssize() - 1; ++i) {
         ostrm << data_[i] << cmm;
     }
-    ostrm << data_[size_ - 1] << ']';
+    ostrm << data_[ssize() - 1] << ']';
     return ostrm;
 }
