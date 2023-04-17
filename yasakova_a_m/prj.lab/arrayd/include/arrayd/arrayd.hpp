@@ -12,19 +12,20 @@ public:
 
     ~ArrayD();
 
-    double& operator[](ptrdiff_t index);
-    const double& operator[](ptrdiff_t index) const;
+    double& operator[](std::ptrdiff_t index);
+    const double& operator[](std::ptrdiff_t index) const;
 
     void insert(const std::ptrdiff_t i, const double value);
     void resize(std::ptrdiff_t new_size);
-    void remove(std::ptrdiff_t i);
+    void reserve(const std::ptrdiff_t newCapacity_);
+    void remove(const std::ptrdiff_t i);
     explicit ArrayD(const std::ptrdiff_t len);
 
     ptrdiff_t ssize() const noexcept;
 
     ArrayD& operator=(const ArrayD& rhs);
 
-    std::ostream& writeto(std::ostream& ostrm) const;
+    std::ostream& writeTo(std::ostream& ostrm) const;
     /*std::istream& readFrom(std::istream& istrm);*/
 
 public:
