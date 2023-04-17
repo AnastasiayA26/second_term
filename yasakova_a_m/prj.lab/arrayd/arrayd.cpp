@@ -64,7 +64,7 @@ void ArrayD::reserve(const std::ptrdiff_t newCapacity_) {
     data_ = newMemory_;
 }
 void ArrayD::resize(const std::ptrdiff_t sizeInp) {
-    if (sizeInp < 0) {
+    if (sizeInp <= 0) {
         throw std::out_of_range("Size must be positive");
     }
     if (sizeInp > capacity_) {
