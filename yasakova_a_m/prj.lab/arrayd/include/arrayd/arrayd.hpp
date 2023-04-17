@@ -21,7 +21,7 @@ public:
     void remove(const std::ptrdiff_t i);
     explicit ArrayD(const std::ptrdiff_t len);
 
-    ptrdiff_t ssize() const noexcept;
+    std::ptrdiff_t ssize() const noexcept;
 
     ArrayD& operator=(const ArrayD& rhs);
 
