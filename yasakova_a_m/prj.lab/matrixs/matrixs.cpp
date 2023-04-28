@@ -52,32 +52,6 @@ MatrixS::MatrixS(std::ptrdiff_t rowsInp_, std::ptrdiff_t colsInp_, int num) : ro
     }
 }
 
-MatrixS::MatrixS(std::initializer_list<std::initializer_list<int>> initList)
-{
-    std::ptrdiff_t rowsNew_ = initList.size();
-    if (rowsNew_ == 0) {
-        throw std::invalid_argument("Number of rows cannot be 0");
-    }
-    rows_ = rowsNew_;
-    std::ptrdiff_t colsNew_ = initList.begin()->size();
-    if (colsNew_ == 0) {
-        throw std::invalid_argument("Number of columns cannot be 0");
-    }
-    cols_ = colsNew_;
-    len_ = rows_ + rows_ * cols_;
-    data_ = new int[len_];
-    std::ptrdiff_t i = 0;
-    for (std::ptrdiff_t i = 0; i < rows_; ++i) {
-        data_[i] = rows_ + i * cols_;
-    }
-    for (auto subList: initList) {
-        if (colsNew_ != subList.size()) {
-            throw std::invalid_argument("Rows must have the same size");
-        }
-        std::copy(subList.begin(), subList.end(), data_ + rows_ + cols_ * i);
-        ++i;
-    }
-}
 
 MatrixS::MatrixS(const MatrixS& prev) : rows_(prev.rows_), cols_(prev.cols_), len_(prev.len_), data_(nullptr){
     if (this == &prev) {
@@ -87,13 +61,7 @@ MatrixS::MatrixS(const MatrixS& prev) : rows_(prev.rows_), cols_(prev.cols_), le
     std::copy(prev.data_, prev.data_ + len_, data_);
 }
 
-//MatrixS::MatrixS(MatrixS&& prev) noexcept : rows_(prev.rows_), cols_(prev.cols_), len_(prev.len_), data_(nullptr){
-//    if (this == &prev) {
-//        return;
-//    }
-//    data_ = new int[len_];
-//    std::copy(prev.data_, prev.data_ + len_, data_);
-//} 
+
 
 MatrixS::~MatrixS()
 {
@@ -174,5 +142,22 @@ void MatrixS::resize(const SizeType& s)
 MatrixS::SizeType MatrixS::ssize() const noexcept
 {
     return SizeType(rows_, cols_);
+}
+MatrixS& MatrixS::operator=(const MatrixS& rhs)
+{
+    if (this == &rhs) {
+        return *this;
+    }
+    rows_ = rhs.rows_;
+    cols_ = rhs.cols_;
+    len_ = rhs.len_;
+    if (data_ != nullptr) {
+        delete[] data_;
+    }
+    data_ = new int[len_];
+    for (std::ptrdiff_t i = 0; i < len_; ++i) {
+        data_[i] = rhs.data_[i];
+    }
+    return *this;
 }
 
