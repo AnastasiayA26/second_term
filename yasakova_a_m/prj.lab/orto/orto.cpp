@@ -1,0 +1,99 @@
+#include <iostream>
+
+class Quad{
+public:
+    Quad(double x, double y, double width, double height): x_(x), y_(y), width_(width), height_(height){}
+     double x() const {return x_;}
+     double y() const {return y_;}
+     double width() const {return width_;}
+     double height() const {return height_;}
+
+    virtual bool Intersect(const Quad& other) const {
+        double x1 = std::max(x_, other.x_);
+        double y1 = std::max(y_, other.y_);
+        double x2 = std::min(x_ + width_, other.x_ + other.width_);
+        double y2 = std::min(y_ + height_, other.y_ + other.height_);
+
+        if (x1 < x2 && y1 < y2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    virtual Quad Union(const Quad& other) const{
+        double x = std::min(x_, other.x_);
+        double y = std::min(y_, other.y_);
+        double width = std::max(x_ + width_, other.x_ + other.width_);
+        double height = std::max(y_ + height_, other.y_ + other.height_);
+        return Quad(x, y, width, height);
+    }
+    virtual void Scale(double factor) {
+        double cx = x_ + width_ / 2.0;
+        double cy = y_ + height_ / 2.0;
+        width_ *= factor;
+        height_ *= factor;
+        x_ = cx - width_ / 2.0;
+        y_ = cy - height_ / 2.0;
+    }
+
+protected:
+    double x_;
+    double y_;
+    double width_;
+    double height_;
+
+};
+
+class Rect: public Quad {
+public:
+    Rect(double x, double y, double width, double height) : Quad(x, y, width, height) {}
+    bool Intersect(const Quad &other) const override {
+        return Quad::Intersect(other);
+    }
+    Quad Union(const Quad &other) const override {
+        return Quad::Union(other);
+    }
+    void Scale(double factor) override{
+        return Quad::Scale(factor);
+    }
+};
+class Square: public Quad{
+public:
+    Square(double x, double y, double size) : Quad(x, y, size, size) {}
+    bool Intersect(const Quad &other) const override {
+        return Quad::Intersect(other);
+    }
+    Quad Union(const Quad &other) const override {
+        return Quad::Union(other);
+    }
+    void Scale(double factor) override{
+        return Quad::Scale(factor);
+    }
+};
+
+int main(){
+    Rect rect1(1, 1, 4, 3);
+    Rect rect2(2, 1, 5, 4);
+    Square square1(5, 5, 2);
+
+    std::cout << "rect1 inter rect2: " << rect1.Intersect(rect2) << std::endl;
+    std::cout << "rect1 inter square: " << rect1.Intersect(square1) << std::endl;
+    std::cout << "square inter rect2: " << square1.Intersect(rect2) << std::endl;
+
+    Quad union1 = rect1.Union(rect2);
+    Quad union2 = rect1.Union(square1);
+    Quad union3 = square1.Union(rect2);
+
+    std::cout << "union1: x=" << union1.x() << " y=" << union1.y() << " w=" << union1.width() << " h=" << union1.height() << std::endl;
+    std::cout << "union2: x=" << union2.x() << " y=" << union2.y() << " w=" << union2.width() << " h=" << union2.height() << std::endl;
+    std::cout << "union3: x=" << union3.x() << " y=" << union3.y() << " w=" << union3.width() << " h=" << union3.height() << std::endl;
+
+    rect1.Scale(2.0);
+    square1.Scale(0.5);
+
+    std::cout << "rect1 scaled: x=" << rect1.x() << " y=" << rect1.y() << " w=" << rect1.width() << " h=" << rect1.height() << std::endl;
+    std::cout << "square1 scaled: x=" << square1.x() << " y=" << square1.y() << " w=" << square1.width() << " h=" << square1.height() << std::endl;
+
+    return 0;
+}
